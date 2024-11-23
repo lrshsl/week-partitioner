@@ -2,18 +2,23 @@ use macroquad::prelude::*;
 
 mod time;
 use miniquad::window::screen_size;
-use time::{hours, Time};
 
 mod table_context;
 use table_context::{TableContext, DAY_END, DAY_START, FONT_SIZE, TABLE_HEIGHT};
 
+const THICK_LINES: f32 = 3.0;
+const THIN_LINES: f32 = 1.0;
+
 #[macroquad::main("Week partitioner")]
 async fn main() {
-    next_frame().await;
-    let table = TableContext::new(screen_size().into());
+    let mut table = TableContext::new();
     loop {
         clear_background(BLACK);
-        draw_text(&format!("FPS: {}", get_fps()), 20.0, 20.0, 30.0, DARKGRAY);
+        if get_fps() < 50 {
+            draw_text(&format!("FPS: {}", get_fps()), 20.0, 20.0, 30.0, DARKGRAY);
+        }
+
+        table.update(screen_size().into());
 
         {
             // Draw time axis
@@ -24,9 +29,15 @@ async fn main() {
                 let y = table.low_y + (i as f32) * hour_height;
                 let h_str = format!("{}", DAY_START.hours() + i);
                 let s = text_size(&h_str);
-                draw_text(&h_str, table.low_x - s.x, y + s.y * 0.5, FONT_SIZE, GRAY);
+                draw_text(
+                    &h_str,
+                    table.low_x - s.x - 20.0,
+                    y + s.y * 0.5,
+                    FONT_SIZE,
+                    GRAY,
+                );
 
-                draw_line(table.low_x, y, table.high_x, y, 1.0, DARKGRAY);
+                draw_line(table.low_x, y, table.high_x, y, THIN_LINES, DARKGRAY);
             }
         }
 
@@ -62,7 +73,7 @@ fn draw_day(table: &TableContext, day_index: usize, name: &'static str) {
         table.low_y,
         table.column_width,
         table.column_height,
-        2.0,
+        THICK_LINES,
         WHITE,
     );
 }

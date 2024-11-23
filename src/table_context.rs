@@ -2,6 +2,8 @@ use macroquad::math::Vec2;
 
 use crate::time::{hours, Time};
 
+pub(crate) const MIN_TABLE_WIDTH: f32 = 600.0;
+pub(crate) const MIN_TABLE_HEIGHT: f32 = 400.0;
 pub(crate) const TABLE_X_MARGIN: f32 = 0.1;
 pub(crate) const TABLE_Y_MARGIN: f32 = 0.12;
 pub(crate) const TABLE_WIDTH: f32 = 1.0 - 2.0 * TABLE_X_MARGIN;
@@ -13,6 +15,9 @@ pub(crate) const DAY_START: Time = hours(6);
 pub(crate) const DAY_END: Time = hours(21);
 
 pub(crate) struct TableContext {
+    pub table_width: f32,
+    pub table_height: f32,
+
     pub column_width: f32,
     pub column_height: f32,
 
@@ -23,31 +28,30 @@ pub(crate) struct TableContext {
 }
 
 impl TableContext {
-    pub fn new(screen_size: Vec2) -> Self {
-        let column_width = TABLE_WIDTH / 7.0 * screen_size.x;
-        let column_height = TABLE_HEIGHT * screen_size.y;
-
-        let low_x = TABLE_X_MARGIN * screen_size.x;
-        let low_y = TABLE_Y_MARGIN * screen_size.y;
-        let high_x = low_x + TABLE_WIDTH * screen_size.x;
-        let high_y = low_y + TABLE_HEIGHT * screen_size.y;
-
+    pub fn new() -> Self {
         Self {
-            column_width,
-            column_height,
-            low_x,
-            low_y,
-            high_x,
-            high_y,
+            table_width: 0.0,
+            table_height: 0.0,
+            column_width: 0.0,
+            column_height: 0.0,
+            low_x: 0.0,
+            low_y: 0.0,
+            high_x: 0.0,
+            high_y: 0.0,
         }
     }
+
     pub fn update(&mut self, screen_size: Vec2) {
-        self.column_width = TABLE_WIDTH / 7.0 * screen_size.x;
-        self.column_height = TABLE_HEIGHT * screen_size.y;
+        self.table_width = (TABLE_WIDTH * screen_size.x).max(MIN_TABLE_WIDTH);
+        self.table_height = (TABLE_HEIGHT * screen_size.y).max(MIN_TABLE_HEIGHT);
+
+        self.column_width = self.table_width / 7.0;
+        self.column_height = self.table_height;
 
         self.low_x = TABLE_X_MARGIN * screen_size.x;
         self.low_y = TABLE_Y_MARGIN * screen_size.y;
-        self.high_x = self.low_x + TABLE_WIDTH;
-        self.high_y = self.low_y + TABLE_HEIGHT;
+
+        self.high_x = self.low_x + self.table_width;
+        self.high_y = self.low_y + self.table_height;
     }
 }
