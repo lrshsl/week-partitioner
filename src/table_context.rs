@@ -1,4 +1,4 @@
-use macroquad::math::Vec2;
+use macroquad::math::{vec2, Vec2};
 
 use crate::time::{hours, Time};
 
@@ -9,7 +9,10 @@ pub(crate) const TABLE_Y_MARGIN: f32 = 0.12;
 pub(crate) const TABLE_WIDTH: f32 = 1.0 - 2.0 * TABLE_X_MARGIN;
 pub(crate) const TABLE_HEIGHT: f32 = 1.0 - 2.0 * TABLE_Y_MARGIN;
 
-pub(crate) const FONT_SIZE: f32 = 30.0;
+pub(crate) const DEFAULT_FONT_SIZE: f32 = 30.0;
+pub(crate) const BUTTON_FONT_SIZE: f32 = 18.0;
+
+pub(crate) const BUTTON_SIZE: Vec2 = vec2(100.0, 30.0);
 
 pub(crate) const DAY_START: Time = hours(6);
 pub(crate) const DAY_END: Time = hours(21);
