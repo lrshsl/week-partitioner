@@ -1,4 +1,4 @@
-use crate::{prelude::*, COLUMN_WIDTH, DAY_END, DAY_NAMES, DAY_START, ENTRIES, LEGEND_SPACING};
+use crate::{prelude::*, COLUMN_WIDTH, DAY_END, DAY_NAMES, DAY_START, LEGEND_SPACING, TRACKS};
 
 pub(crate) fn draw_screen(screen_buffer: &Texture2D) {
     draw_texture_ex(
@@ -14,12 +14,14 @@ pub(crate) fn draw_screen(screen_buffer: &Texture2D) {
     );
 }
 
-pub(crate) fn draw_all() {
+pub(crate) fn draw_all(track_buttons: &Vec<Button>) {
     clear_background(BLACK);
 
     draw_hours();
     draw_days(&DAY_NAMES);
-    draw_legend(&ENTRIES);
+    for button in track_buttons {
+        button.draw();
+    }
 }
 
 pub(crate) fn draw_fps() {
@@ -80,26 +82,5 @@ fn draw_days(day_names: &[&'static str]) {
             THICK_LINES,
             WHITE,
         );
-    }
-}
-
-fn draw_legend(entries: &[(&'static str, Color)]) {
-    for (i, (entry, color)) in entries.iter().enumerate() {
-        let x = TABLE_MARGIN.x + LEGEND_SPACING * i as f32 + LEGEND_SPACING * 0.5;
-        let y = H - vh(8.0);
-
-        let w = BUTTON_SIZE.x;
-        let h = BUTTON_SIZE.y;
-
-        draw_rectangle_lines(x, y, w, h, 2.0, *color);
-        draw_text_centered!(entry,
-                    x + w * 0.5,
-                    y + h * 0.5,
-                    font_size: BUTTON_FONT_SIZE,
-                    color: *color);
-
-        if is_clicked(x, y, w, h) {
-            info!("Selected: {}", entry);
-        }
     }
 }

@@ -26,11 +26,15 @@ pub const fn rect(x: f32, y: f32, w: f32, h: f32) -> Rect {
     Rect { x, y, w, h }
 }
 
-pub fn is_clicked(x: f32, y: f32, w: f32, h: f32) -> bool {
+pub fn is_clicked(rect: Rect) -> bool {
     is_mouse_button_pressed(MouseButton::Left)
-        && Rect { x, y, w, h }.contains(mouse_position().into())
+        && rect.contains(to_buffer_cords(mouse_position().into()))
 }
 
 pub fn text_size(s: &str) -> Vec2 {
     get_text_center(s, None, DEFAULT_FONT_SIZE as u16, 1.0, 0.0).abs() * 2.0
+}
+
+pub fn to_buffer_cords(screen_cords: Vec2) -> Vec2 {
+    screen_cords / Vec2::from(screen_size()) * AREA_SIZE
 }
