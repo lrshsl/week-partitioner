@@ -1,3 +1,5 @@
+use itertools::Itertools as _;
+
 use crate::{prelude::*, COLUMN_WIDTH, HOUR_HEIGHT, N_DAYS};
 
 #[derive(Clone, Copy, Debug)]
@@ -43,14 +45,15 @@ pub(crate) fn update_tracks(ctx: &mut Context) {
 }
 
 pub(crate) fn draw_tracks(ctx: &Context) {
-    for (i, (fields, tmp_fields)) in ctx.fields.iter().zip(ctx.tmp_fields.iter()).enumerate() {
-        let mut fields = fields.clone();
-        fields.extend(tmp_fields.clone());
-        let n_fields = fields.clone().len();
-        for field in fields {
-            let mut r = get_field_rect(i);
-            r.y /= n_fields as f32;
-            draw_rect(r, ctx.track_list[field].clr);
+    for (field_i, (tracks, tmp_tracks)) in ctx.fields.iter().zip(ctx.tmp_fields.iter()).enumerate()
+    {
+        let all_tracks = tracks.union(tmp_tracks).sorted();
+        let n_tracks = all_tracks.clone().count();
+        for (track_i, &track) in all_tracks.enumerate() {
+            let mut r = get_field_rect(field_i);
+            r.w /= n_tracks as f32;
+            r.x += r.w * track_i as f32;
+            draw_rect(r, ctx.track_list[track].clr);
         }
     }
 }
