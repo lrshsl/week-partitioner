@@ -1,4 +1,17 @@
-use crate::{prelude::*, COLUMN_WIDTH, DAY_END, DAY_NAMES, DAY_START, LEGEND_SPACING, TRACKS};
+use macroquad::{
+    math::Rect,
+    shapes::draw_rectangle_lines,
+    text::draw_text,
+    texture::{draw_texture_ex, DrawTextureParams, Texture2D},
+    time::get_fps,
+    window::clear_background,
+};
+
+use crate::{
+    prelude::*,
+    tracks::{draw_tracks, get_field_rect},
+    COLUMN_WIDTH, DAY_END, DAY_NAMES, DAY_START, HOUR_HEIGHT, LEGEND_SPACING, N_DAYS,
+};
 
 pub(crate) fn draw_screen(screen_buffer: &Texture2D) {
     draw_texture_ex(
@@ -14,14 +27,16 @@ pub(crate) fn draw_screen(screen_buffer: &Texture2D) {
     );
 }
 
-pub(crate) fn draw_all(track_buttons: &Vec<Button>) {
+pub(crate) fn draw_all(ctx: &Context, track_buttons: &Vec<Button>) {
     clear_background(BLACK);
+    draw_fps();
 
     draw_hours();
     draw_days(&DAY_NAMES);
     for button in track_buttons {
         button.draw();
     }
+    draw_tracks(&ctx.fields);
 }
 
 pub(crate) fn draw_fps() {
@@ -36,29 +51,20 @@ pub(crate) fn draw_fps() {
 
 fn draw_hours() {
     // Draw time axis
-    let day_hours = (DAY_END - DAY_START).hours_precise();
-    let hour_height = TABLE_SIZE.y / day_hours;
-
-    for i in 0..(day_hours as i32 + 1) {
-        let y = TABLE_MARGIN.y + (i as f32) * hour_height;
-        let h_str = format!("{}", DAY_START.hours() + i);
-        let s = text_size(&h_str);
+    for h in 0..N_HOURS {
+        let h_str = format!("{}", DAY_START.hours() + h as i32);
+        let s = text_size(&h_str, SMALLER_FONT_SIZE);
         draw_text(
             &h_str,
-            TABLE_MARGIN.x - s.x - vw(20.0),
-            y + s.y * 0.5,
-            DEFAULT_FONT_SIZE,
+            TABLE_MARGIN.x - s.x - vw(2.0),
+            TABLE_MARGIN.y + COLUMN_WIDTH * h as f32 + s.y * 0.5,
+            SMALLER_FONT_SIZE,
             GRAY,
         );
+    }
 
-        draw_line(
-            TABLE_MARGIN.x,
-            y,
-            TABLE_MARGIN.x + TABLE_SIZE.x,
-            y,
-            THIN_LINES,
-            DARKGRAY,
-        );
+    for field in 0..(N_HOURS * N_DAYS) {
+        draw_rect_lines(get_field_rect(field), THIN_LINES, DARKGRAY);
     }
 }
 

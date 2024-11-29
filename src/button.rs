@@ -1,5 +1,6 @@
 use crate::{prelude::*, Track};
 
+#[derive(Clone, Debug)]
 pub(crate) struct Button {
     text: &'static str,
     clr: Color,
@@ -18,12 +19,11 @@ impl Button {
         draw_text_centered!(self.text,
                             x + w * 0.5,
                             y + h * 0.5,
-                            font_size: BUTTON_FONT_SIZE,
+                            font_size: SMALLER_FONT_SIZE,
                             color: self.clr);
     }
 
     pub fn update(&self, ctx: &mut Context) {
-        if is_mouse_button_pressed(MouseButton::Left) {}
         if is_clicked(self.rect) {
             ctx.current_track = Track::from((self.text, self.clr));
             println!("Selected: {}", ctx.current_track.name);

@@ -13,10 +13,10 @@ pub(crate) const TABLE_SIZE: Vec2 = vec2(
     vh(100.0) - 2.0 * TABLE_MARGIN.y,
 );
 
-pub(crate) const DEFAULT_FONT_SIZE: f32 = 30.0;
-pub(crate) const BUTTON_FONT_SIZE: f32 = 20.0;
+pub(crate) const DEFAULT_FONT_SIZE: f32 = 32.0;
+pub(crate) const SMALLER_FONT_SIZE: f32 = 24.0;
 
-pub(crate) const BUTTON_SIZE: Vec2 = vec2(100.0, 30.0);
+pub(crate) const BUTTON_SIZE: Vec2 = vec2(128.0, 32.0);
 
 pub(crate) const THICK_LINES: f32 = 3.0;
 pub(crate) const THIN_LINES: f32 = 1.0;

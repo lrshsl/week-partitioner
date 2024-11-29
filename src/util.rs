@@ -16,6 +16,7 @@ macro_rules! draw_text_centered {
 }
 
 pub(crate) use draw_text_centered;
+use macroquad::text::get_text_center;
 
 pub fn draw_text_centered_fn(s: &str, x: f32, y: f32, font_size: f32, color: Color) {
     let c = get_text_center(s, None, font_size as u16, 1.0, 0.0).abs() * 2.0;
@@ -26,13 +27,25 @@ pub const fn rect(x: f32, y: f32, w: f32, h: f32) -> Rect {
     Rect { x, y, w, h }
 }
 
+pub fn draw_rect_lines(r: Rect, thickness: f32, clr: Color) {
+    draw_rectangle_lines(r.x, r.y, r.w, r.h, thickness, clr)
+}
+
+pub fn draw_rect(r: Rect, clr: Color) {
+    draw_rectangle(r.x, r.y, r.w, r.h, clr)
+}
+
 pub fn is_clicked(rect: Rect) -> bool {
     is_mouse_button_pressed(MouseButton::Left)
         && rect.contains(to_buffer_cords(mouse_position().into()))
 }
 
-pub fn text_size(s: &str) -> Vec2 {
+pub fn text_size(s: &str, font_size: f32) -> Vec2 {
     get_text_center(s, None, DEFAULT_FONT_SIZE as u16, 1.0, 0.0).abs() * 2.0
+}
+
+pub fn mouse_pos() -> Vec2 {
+    to_buffer_cords(mouse_position().into())
 }
 
 pub fn to_buffer_cords(screen_cords: Vec2) -> Vec2 {
