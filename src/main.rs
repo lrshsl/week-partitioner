@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use crate::drag_state::update_drag_state;
 use draw_functions::{draw_all, draw_fps, draw_screen};
 use macroquad::{
@@ -42,8 +44,6 @@ pub(crate) const DAY_NAMES: [&'static str; N_DAYS] =
 async fn main() {
     let render_target = render_target(RESOLUTION.x as u32, RESOLUTION.y as u32);
 
-    println!("margin: {}", TABLE_MARGIN);
-
     let screen_buffer = Camera2D {
         zoom: Vec2::ONE / AREA_SIZE * 2.0,
         offset: Vec2::NEG_ONE,
@@ -57,7 +57,8 @@ async fn main() {
 
         track_list: TRACKS.into(),
         current_track: 0,
-        fields: vec![None; N_DAYS * N_HOURS],
+        fields: vec![HashSet::new(); N_DAYS * N_HOURS],
+        tmp_fields: vec![HashSet::new(); N_DAYS * N_HOURS],
     };
 
     let track_buttons = make_track_buttons(&ctx);
@@ -118,7 +119,8 @@ pub(crate) struct Context {
 
     track_list: Vec<TrackData>,
     current_track: TrackId,
-    fields: Vec<Option<TrackId>>,
+    fields: Vec<HashSet<TrackId>>,
+    tmp_fields: Vec<HashSet<TrackId>>,
 }
 
 pub(crate) type TrackId = usize;

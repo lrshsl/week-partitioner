@@ -21,19 +21,36 @@ impl From<(&'static str, Color)> for TrackData {
 }
 
 pub(crate) fn update_tracks(ctx: &mut Context) {
-    if let Some(DragState::Dragging { start, current }) = ctx.drag_state {
-        let f1 = get_field_at(start).unwrap();
-        let f2 = get_field_at(current).unwrap();
-        for i in f1.min(f2)..=f1.max(f2) {
-            ctx.fields[i] = Some(ctx.current_track);
+    match ctx.drag_state {
+        Some(DragState::Dragging { start, current }) => {
+            ctx.tmp_fields.iter_mut().for_each(|x| x.clear());
+            let f1 = get_field_at(start).unwrap();
+            let f2 = get_field_at(current).unwrap();
+            for i in f1.min(f2)..=f1.max(f2) {
+                ctx.tmp_fields[i].insert(ctx.current_track);
+            }
         }
+        Some(DragState::JustReleased { start, end }) => {
+            let f1 = get_field_at(start).unwrap();
+            let f2 = get_field_at(end).unwrap();
+            for i in f1.min(f2)..=f1.max(f2) {
+                ctx.fields[i].insert(ctx.current_track);
+            }
+            ctx.tmp_fields.iter_mut().for_each(|x| x.clear());
+        }
+        _ => {}
     }
 }
 
 pub(crate) fn draw_tracks(ctx: &Context) {
-    for (field, track) in ctx.fields.iter().enumerate() {
-        if let Some(track_id) = track {
-            draw_rect(get_field_rect(field), ctx.track_list[*track_id].clr);
+    for (i, (fields, tmp_fields)) in ctx.fields.iter().zip(ctx.tmp_fields.iter()).enumerate() {
+        let mut fields = fields.clone();
+        fields.extend(tmp_fields.clone());
+        let n_fields = fields.clone().len();
+        for field in fields {
+            let mut r = get_field_rect(i);
+            r.y /= n_fields as f32;
+            draw_rect(r, ctx.track_list[field].clr);
         }
     }
 }
