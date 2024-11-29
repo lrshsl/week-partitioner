@@ -1,9 +1,9 @@
-use crate::{prelude::*, tracks::get_field_at};
+use crate::prelude::*;
 
 pub(crate) fn update_drag_state(drag_state: &mut Option<DragState>) {
     *drag_state = match drag_state {
         None => {
-            if is_mouse_button_pressed(MouseButton::Left) && get_field_at(mouse_pos()).is_some() {
+            if is_mouse_button_pressed(MouseButton::Left) {
                 Some(DragState::Started(mouse_pos()))
             } else {
                 None

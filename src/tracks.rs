@@ -25,20 +25,21 @@ impl From<(&'static str, Color)> for TrackData {
 pub(crate) fn update_tracks(ctx: &mut Context) {
     match ctx.drag_state {
         Some(DragState::Dragging { start, current }) => {
+            let Some(f1) = get_field_at(start) else {
+                return;
+            };
+            let Some(f2) = get_field_at(current) else {
+                return;
+            };
             ctx.tmp_fields.iter_mut().for_each(|x| x.clear());
-            let f1 = get_field_at(start).unwrap();
-            let f2 = get_field_at(current).unwrap();
             for i in f1.min(f2)..=f1.max(f2) {
                 ctx.tmp_fields[i].insert(ctx.current_track);
             }
         }
-        Some(DragState::JustReleased { start, end }) => {
-            let f1 = get_field_at(start).unwrap();
-            let f2 = get_field_at(end).unwrap();
-            for i in f1.min(f2)..=f1.max(f2) {
-                ctx.fields[i].insert(ctx.current_track);
+        Some(DragState::JustReleased { .. }) => {
+            for (field, tmp_field) in ctx.fields.iter_mut().zip(ctx.tmp_fields.iter()) {
+                field.extend(tmp_field);
             }
-            ctx.tmp_fields.iter_mut().for_each(|x| x.clear());
         }
         _ => {}
     }
