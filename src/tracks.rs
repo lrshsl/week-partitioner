@@ -47,13 +47,12 @@ pub(crate) fn update_tracks(ctx: &mut Context) {
 pub(crate) fn draw_tracks(ctx: &Context) {
     for (field_i, (tracks, tmp_tracks)) in ctx.fields.iter().zip(ctx.tmp_fields.iter()).enumerate()
     {
-        let all_tracks = tracks.union(tmp_tracks).sorted();
-        let n_tracks = all_tracks.clone().count();
-        for (track_i, &track) in all_tracks.enumerate() {
+        let all_tracks = tracks.union(tmp_tracks);
+        for &track_id in all_tracks {
             let mut r = get_field_rect(field_i);
-            r.w /= n_tracks as f32;
-            r.x += r.w * track_i as f32;
-            draw_rect(r, ctx.track_list[track].clr);
+            r.w /= N_TRACKS as f32;
+            r.x += r.w * track_id as f32;
+            draw_rect(r, ctx.track_list[track_id].clr);
         }
     }
 }
