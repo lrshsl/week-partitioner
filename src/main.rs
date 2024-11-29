@@ -25,11 +25,14 @@ pub(crate) const N_HOURS: usize = (DAY_END.hours() - DAY_START.hours()) as usize
 pub(crate) const HOUR_HEIGHT: f32 = TABLE_SIZE.y / N_HOURS as f32;
 
 pub(crate) const N_TRACKS: usize = 3;
-pub(crate) const TRACKS: [(&'static str, Color); N_TRACKS] =
-    [("Analysis II", RED), ("Algs", GREEN), ("LinAlg", YELLOW)];
-pub(crate) const LEGEND_SPACING: f32 = TABLE_SIZE.x / N_TRACKS as f32;
+pub(crate) const TRACKS: [TrackData; N_TRACKS] = [
+    TrackData::new("Analysis II", RED),
+    TrackData::new("Algs", GREEN),
+    TrackData::new("LinAlg", YELLOW),
+];
 
 pub(crate) const COLUMN_WIDTH: f32 = TABLE_SIZE.x / N_DAYS as f32;
+pub(crate) const LEGEND_SPACING: f32 = TABLE_SIZE.x / N_TRACKS as f32;
 
 pub(crate) const N_DAYS: usize = 7;
 pub(crate) const DAY_NAMES: [&'static str; N_DAYS] =
@@ -52,11 +55,12 @@ async fn main() {
         screen_size: vec2(0.0, 0.0),
         drag_state: None,
 
-        current_track: Track::from(TRACKS[0]),
+        track_list: TRACKS.into(),
+        current_track: 0,
         fields: vec![None; N_DAYS * N_HOURS],
     };
 
-    let track_buttons = make_track_buttons();
+    let track_buttons = make_track_buttons(&ctx);
 
     loop {
         #[cfg(debug_assertions)]
@@ -81,11 +85,11 @@ async fn main() {
     }
 }
 
-pub(crate) fn make_track_buttons() -> Vec<Button> {
-    TRACKS
-        .into_iter()
+pub(crate) fn make_track_buttons(ctx: &Context) -> Vec<Button> {
+    ctx.track_list
+        .iter()
         .enumerate()
-        .map(|(i, (text, color))| {
+        .map(|(i, track)| {
             let button_rect = Rect {
                 x: TABLE_MARGIN.x + LEGEND_SPACING * i as f32 + LEGEND_SPACING * 0.5
                     - BUTTON_SIZE.x * 0.5,
@@ -93,15 +97,17 @@ pub(crate) fn make_track_buttons() -> Vec<Button> {
                 w: BUTTON_SIZE.x,
                 h: BUTTON_SIZE.y,
             };
-            Button::new(text, color, button_rect)
+            Button::new(track.name, track.clr, button_rect)
         })
         .collect()
 }
 
 pub(crate) fn update_all(ctx: &mut Context, buttons: &[Button]) {
     update_drag_state(&mut ctx.drag_state);
-    for button in buttons {
-        button.update(ctx);
+    for (i, button) in buttons.iter().enumerate() {
+        if button.is_clicked() {
+            ctx.current_track = i;
+        }
     }
     update_tracks(ctx);
 }
@@ -110,6 +116,9 @@ pub(crate) struct Context {
     screen_size: Vec2,
     drag_state: Option<DragState>,
 
-    current_track: Track,
-    fields: Vec<Option<Track>>,
+    track_list: Vec<TrackData>,
+    current_track: TrackId,
+    fields: Vec<Option<TrackId>>,
 }
+
+pub(crate) type TrackId = usize;

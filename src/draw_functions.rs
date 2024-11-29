@@ -36,7 +36,7 @@ pub(crate) fn draw_all(ctx: &Context, track_buttons: &Vec<Button>) {
     for button in track_buttons {
         button.draw();
     }
-    draw_tracks(&ctx.fields);
+    draw_tracks(ctx);
 }
 
 pub(crate) fn draw_fps() {

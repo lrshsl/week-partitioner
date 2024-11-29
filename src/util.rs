@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use macroquad::text::get_text_center;
 
 macro_rules! draw_text_centered {
     ($text:expr, $x:expr, $y:expr) => {
@@ -16,7 +17,6 @@ macro_rules! draw_text_centered {
 }
 
 pub(crate) use draw_text_centered;
-use macroquad::text::get_text_center;
 
 pub fn draw_text_centered_fn(s: &str, x: f32, y: f32, font_size: f32, color: Color) {
     let c = get_text_center(s, None, font_size as u16, 1.0, 0.0).abs() * 2.0;

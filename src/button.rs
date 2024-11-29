@@ -1,4 +1,4 @@
-use crate::{prelude::*, Track};
+use crate::{prelude::*, TrackData};
 
 #[derive(Clone, Debug)]
 pub(crate) struct Button {
@@ -23,10 +23,7 @@ impl Button {
                             color: self.clr);
     }
 
-    pub fn update(&self, ctx: &mut Context) {
-        if is_clicked(self.rect) {
-            ctx.current_track = Track::from((self.text, self.clr));
-            println!("Selected: {}", ctx.current_track.name);
-        }
+    pub fn is_clicked(&self) -> bool {
+        is_clicked(self.rect)
     }
 }
