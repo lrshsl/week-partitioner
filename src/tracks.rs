@@ -1,6 +1,6 @@
 use itertools::Itertools as _;
 
-use crate::{prelude::*, COLUMN_WIDTH, HOUR_HEIGHT, N_DAYS};
+use crate::{prelude::*, TrackId, COLUMN_WIDTH, HOUR_HEIGHT, N_DAYS};
 
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct TrackData {
@@ -23,25 +23,27 @@ impl From<(&'static str, Color)> for TrackData {
 }
 
 pub(crate) fn update_tracks(ctx: &mut Context) {
-    match ctx.drag_state {
-        Some(DragState::Dragging { start, current }) => {
-            let Some(f1) = get_field_at(start) else {
-                return;
-            };
-            let Some(f2) = get_field_at(current) else {
-                return;
-            };
-            ctx.tmp_fields.iter_mut().for_each(|x| x.clear());
-            for i in f1.min(f2)..=f1.max(f2) {
-                ctx.tmp_fields[i].insert(ctx.current_track);
+    if let Some(current_track) = ctx.current_track {
+        match ctx.drag_state {
+            Some(DragState::Dragging { start, current }) => {
+                let Some(f1) = get_field_at(start) else {
+                    return;
+                };
+                let Some(f2) = get_field_at(current) else {
+                    return;
+                };
+                ctx.tmp_fields.iter_mut().for_each(|x| x.clear());
+                for i in f1.min(f2)..=f1.max(f2) {
+                    ctx.tmp_fields[i].insert(current_track);
+                }
             }
-        }
-        Some(DragState::JustReleased { .. }) => {
-            for (field, tmp_field) in ctx.fields.iter_mut().zip(ctx.tmp_fields.iter()) {
-                field.extend(tmp_field);
+            Some(DragState::JustReleased { .. }) => {
+                for (field, tmp_field) in ctx.fields.iter_mut().zip(ctx.tmp_fields.iter()) {
+                    field.extend(tmp_field);
+                }
             }
+            _ => {}
         }
-        _ => {}
     }
 }
 
@@ -54,8 +56,19 @@ pub(crate) fn draw_tracks(ctx: &Context) {
             r.w /= N_TRACKS as f32;
             r.x += r.w * track_id as f32;
             draw_rect(r, ctx.track_list[track_id].clr);
+            if ctx.selection.contains(&(field_i, track_id)) {
+                draw_rect_lines(r, THICK_LINES, WHITE);
+            }
         }
     }
+}
+
+pub(crate) fn get_track_at(pos: Vec2) -> Option<(usize, TrackId)> {
+    let field = get_field_at(pos)?;
+    let pos = pos - TABLE_MARGIN;
+    let x_in_col = pos.x % COLUMN_WIDTH;
+    let track = (x_in_col / (COLUMN_WIDTH / N_TRACKS as f32)) as usize;
+    Some((field, track))
 }
 
 pub(crate) fn get_field_rect(field: usize) -> Rect {

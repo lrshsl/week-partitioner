@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use crate::drag_state::update_drag_state;
+use button::TrackButton;
 use draw_functions::{draw_all, draw_fps, draw_screen};
 use macroquad::{
     camera::{set_camera, set_default_camera, Camera2D},
@@ -9,7 +10,7 @@ use macroquad::{
     window::next_frame,
 };
 use prelude::*;
-use tracks::update_tracks;
+use tracks::{get_track_at, update_tracks};
 
 mod button;
 mod constants;
@@ -54,9 +55,11 @@ async fn main() {
     let mut ctx = Context {
         screen_size: vec2(0.0, 0.0),
         drag_state: None,
+        selection: HashSet::new(),
 
         track_list: TRACKS.into(),
-        current_track: 0,
+        current_track: None,
+
         fields: vec![HashSet::new(); N_DAYS * N_HOURS],
         tmp_fields: vec![HashSet::new(); N_DAYS * N_HOURS],
     };
@@ -86,39 +89,79 @@ async fn main() {
     }
 }
 
-pub(crate) fn make_track_buttons(ctx: &Context) -> Vec<Button> {
+pub(crate) fn make_track_buttons(ctx: &Context) -> Vec<TrackButton> {
     ctx.track_list
         .iter()
         .enumerate()
-        .map(|(i, track)| {
+        .map(|(track_id, track)| {
             let button_rect = Rect {
-                x: TABLE_MARGIN.x + LEGEND_SPACING * i as f32 + LEGEND_SPACING * 0.5
+                x: TABLE_MARGIN.x + LEGEND_SPACING * track_id as f32 + LEGEND_SPACING * 0.5
                     - BUTTON_SIZE.x * 0.5,
                 y: TABLE_MARGIN.y + TABLE_SIZE.y + vh(5.0),
                 w: BUTTON_SIZE.x,
                 h: BUTTON_SIZE.y,
             };
-            Button::new(track.name, track.clr, button_rect)
+            TrackButton::new(track_id, track.name, button_rect, track.clr, BLACK)
         })
         .collect()
 }
 
-pub(crate) fn update_all(ctx: &mut Context, buttons: &[Button]) {
+pub(crate) fn update_all(ctx: &mut Context, buttons: &[TrackButton]) {
     update_drag_state(&mut ctx.drag_state);
-    for (i, button) in buttons.iter().enumerate() {
-        if button.is_clicked() {
-            ctx.current_track = i;
+    if is_mouse_button_pressed(MouseButton::Left) && !TABLE_RECT.contains(mouse_pos()) {
+        ctx.current_track = None;
+        ctx.selection.clear();
+    }
+    for (i, track_button) in buttons.iter().enumerate() {
+        if track_button.is_clicked() {
+            if ctx.current_track == Some(track_button.id) {
+                ctx.current_track = None;
+            } else {
+                ctx.current_track = Some(i);
+            }
         }
     }
     update_tracks(ctx);
+    update_selection(ctx);
+}
+
+fn update_selection(ctx: &mut Context) {
+    if ctx.current_track.is_none() {
+        match ctx.drag_state {
+            Some(DragState::Dragging { current, .. }) => {
+                if let Some(track_selection) = get_track_at(current) {
+                    ctx.selection.insert(track_selection);
+                }
+            }
+            Some(DragState::JustReleased { start, end }) => {
+                // Single click (still in the same field)
+                let first_track = get_track_at(start);
+
+                if first_track.is_some() && first_track == get_track_at(end) {
+                    let track_selection = first_track.unwrap();
+                    if ctx.selection.contains(&track_selection) {
+                        ctx.selection.remove(&track_selection);
+                    } else {
+                        ctx.selection.insert(track_selection);
+                    }
+                } else {
+                    // Deselect
+                    ctx.current_track = None;
+                }
+            }
+            _ => {}
+        }
+    }
 }
 
 pub(crate) struct Context {
     screen_size: Vec2,
     drag_state: Option<DragState>,
+    selection: HashSet<(usize, TrackId)>,
 
     track_list: Vec<TrackData>,
-    current_track: TrackId,
+    current_track: Option<TrackId>,
+
     fields: Vec<HashSet<TrackId>>,
     tmp_fields: Vec<HashSet<TrackId>>,
 }

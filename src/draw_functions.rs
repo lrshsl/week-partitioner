@@ -8,6 +8,7 @@ use macroquad::{
 };
 
 use crate::{
+    button::TrackButton,
     prelude::*,
     tracks::{draw_tracks, get_field_rect},
     COLUMN_WIDTH, DAY_END, DAY_NAMES, DAY_START, HOUR_HEIGHT, LEGEND_SPACING, N_DAYS,
@@ -27,16 +28,17 @@ pub(crate) fn draw_screen(screen_buffer: &Texture2D) {
     );
 }
 
-pub(crate) fn draw_all(ctx: &Context, track_buttons: &Vec<Button>) {
+pub(crate) fn draw_all(ctx: &Context, track_buttons: &Vec<TrackButton>) {
     clear_background(BLACK);
     draw_fps();
 
-    draw_hours();
-    draw_days(&DAY_NAMES);
-    for button in track_buttons {
-        button.draw();
+    draw_fields();
+    draw_columns(&DAY_NAMES);
+    for track_button in track_buttons {
+        track_button.draw(ctx);
     }
     draw_tracks(ctx);
+    //draw_selection(ctx);
 }
 
 pub(crate) fn draw_fps() {
@@ -49,7 +51,7 @@ pub(crate) fn draw_fps() {
     );
 }
 
-fn draw_hours() {
+fn draw_fields() {
     // Draw time axis
     for h in 0..N_HOURS {
         let h_str = format!("{}", DAY_START.hours() + h as i32);
@@ -68,7 +70,7 @@ fn draw_hours() {
     }
 }
 
-fn draw_days(day_names: &[&'static str]) {
+fn draw_columns(day_names: &[&'static str]) {
     // Draw day tables
     for (i, day_name) in day_names.iter().enumerate() {
         // Draw name

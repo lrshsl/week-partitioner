@@ -1,4 +1,4 @@
-use macroquad::math::{vec2, Vec2};
+use crate::prelude::*;
 
 pub(crate) const W: f32 = 700.0;
 pub(crate) const H: f32 = 700.0;
@@ -12,6 +12,12 @@ pub(crate) const TABLE_SIZE: Vec2 = vec2(
     vw(100.0) - 2.0 * TABLE_MARGIN.x,
     vh(100.0) - 2.0 * TABLE_MARGIN.y,
 );
+pub(crate) const TABLE_RECT: Rect = Rect {
+    x: TABLE_MARGIN.x,
+    y: TABLE_MARGIN.y,
+    w: TABLE_SIZE.x,
+    h: TABLE_SIZE.y,
+};
 
 pub(crate) const DEFAULT_FONT_SIZE: f32 = 32.0;
 pub(crate) const SMALLER_FONT_SIZE: f32 = 24.0;
