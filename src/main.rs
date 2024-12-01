@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 
 use crate::drag_state::update_drag_state;
 use button::TrackButton;
-use draw_functions::{draw_all, draw_screen};
+use draw_functions::{draw_all, draw_fps, draw_screen};
 use macroquad::{
     camera::{set_camera, set_default_camera, Camera2D},
     math::Rect,

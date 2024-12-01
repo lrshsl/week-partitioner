@@ -1,5 +1,3 @@
-use itertools::Itertools as _;
-
 use crate::{prelude::*, TrackId, COLUMN_WIDTH, HOUR_HEIGHT, N_DAYS};
 
 #[derive(Clone, Copy, Debug)]
