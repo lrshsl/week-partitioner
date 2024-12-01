@@ -33,6 +33,7 @@ pub(crate) fn update_tracks(ctx: &mut Context) {
                     return;
                 };
                 ctx.tmp_fields.iter_mut().for_each(|x| x.clear());
+                ctx.selection.clear();
                 for i in f1.min(f2)..=f1.max(f2) {
                     ctx.tmp_fields[i].insert(current_track);
                 }

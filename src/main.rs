@@ -1,8 +1,8 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use crate::drag_state::update_drag_state;
 use button::TrackButton;
-use draw_functions::{draw_all, draw_fps, draw_screen};
+use draw_functions::{draw_all, draw_screen};
 use macroquad::{
     camera::{set_camera, set_default_camera, Camera2D},
     math::Rect,
@@ -43,6 +43,12 @@ pub(crate) const DAY_NAMES: [&'static str; N_DAYS] =
 
 #[macroquad::main("Week partitioner")]
 async fn main() {
+    let default_keymaps: HashMap<KeyCode, Action> = HashMap::from([
+        (KeyCode::D, Action::Delete),
+        (KeyCode::Delete, Action::Delete),
+        (KeyCode::Escape, Action::Esc),
+    ]);
+
     let render_target = render_target(RESOLUTION.x as u32, RESOLUTION.y as u32);
 
     let screen_buffer = Camera2D {
@@ -62,6 +68,8 @@ async fn main() {
 
         fields: vec![HashSet::new(); N_DAYS * N_HOURS],
         tmp_fields: vec![HashSet::new(); N_DAYS * N_HOURS],
+
+        keymaps: HashMap::from(default_keymaps),
     };
 
     let track_buttons = make_track_buttons(&ctx);
@@ -129,6 +137,41 @@ pub(crate) fn update_all(ctx: &mut Context, buttons: &[TrackButton]) {
     }
     update_tracks(ctx);
     update_selection(ctx);
+    update_actions(ctx);
+}
+
+#[derive(Clone, Copy, Debug)]
+pub(crate) enum Action {
+    Delete,
+    Esc,
+}
+
+impl Action {
+    pub fn execute(&self, ctx: &mut Context) {
+        match self {
+            Self::Delete => {
+                for (field_i, track_id) in ctx.selection.iter() {
+                    ctx.fields[*field_i].remove(track_id);
+                    ctx.tmp_fields[*field_i].remove(track_id);
+                }
+                ctx.selection.clear();
+            }
+            Self::Esc => {
+                ctx.selection.clear();
+                ctx.current_track = None;
+            }
+        }
+    }
+}
+
+fn update_actions(ctx: &mut Context) {
+    if let Some(ref keycode) = get_last_key_pressed() {
+        if let Some(action) = ctx.keymaps.get(keycode).copied() {
+            action.execute(ctx);
+        } else {
+            println!("No action for key code: {keycode:?}");
+        }
+    }
 }
 
 fn update_selection(ctx: &mut Context) {
@@ -170,6 +213,8 @@ pub(crate) struct Context {
 
     fields: Vec<HashSet<TrackId>>,
     tmp_fields: Vec<HashSet<TrackId>>,
+
+    keymaps: HashMap<KeyCode, Action>,
 }
 
 pub(crate) type TrackId = usize;
